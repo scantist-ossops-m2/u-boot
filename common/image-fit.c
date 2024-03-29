@@ -1368,21 +1368,31 @@ error:
  */
 int fit_image_verify(const void *fit, int image_noffset)
 {
+	const char *name = fit_get_name(fit, image_noffset, NULL);
 	const void	*data;
 	size_t		size;
-	int		noffset = 0;
 	char		*err_msg = "";
 
+	if (strchr(name, '@')) {
+		/*
+		 * We don't support this since libfdt considers names with the
+		 * name root but different @ suffix to be equal
+		 */
+		err_msg = "Node name contains @";
+		goto err;
+	}
 	/* Get image data and data length */
 	if (fit_image_get_data_and_size(fit, image_noffset, &data, &size)) {
 		err_msg = "Can't get image data/size";
-		printf("error!\n%s for '%s' hash node in '%s' image node\n",
-		       err_msg, fit_get_name(fit, noffset, NULL),
-		       fit_get_name(fit, image_noffset, NULL));
-		return 0;
+		goto err;
 	}
 
 	return fit_image_verify_with_data(fit, image_noffset, data, size);
+
+err:
+	printf("error!\n%s in '%s' image node\n", err_msg,
+	       fit_get_name(fit, image_noffset, NULL));
+	return 0;
 }
 
 /**
@@ -1572,6 +1582,22 @@ int fit_check_format(const void *fit)
 	if (fdt_check_header(fit)) {
 		debug("Wrong FIT format: not a flattened device tree\n");
 		return 0;
+	}
+
+	if (CONFIG_IS_ENABLED(FIT_FULL_CHECK)) {
+		/*
+		 * If we are not given the size, make do wtih calculating it.
+		 * This is not as secure, so we should consider a flag to
+		 * control this.
+		 */
+		if (size == IMAGE_SIZE_INVAL)
+			size = fdt_totalsize(fit);
+		ret = fdt_check_full(fit, size);
+
+		if (ret) {
+			log_debug("FIT check error %d\n", ret);
+			return -EINVAL;
+		}
 	}
 
 	/* mandatory / node 'description' property */
