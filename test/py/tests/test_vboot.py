@@ -28,6 +28,7 @@ import pytest
 import sys
 import struct
 import u_boot_utils as util
+import vboot_forge
 
 @pytest.mark.boardspec('sandbox')
 @pytest.mark.buildconfigspec('fit_signature')
@@ -164,10 +165,24 @@ def test_vboot(u_boot_console):
 
         cons.log.action('%s: Check signed config on the host' % sha_algo)
 
-        util.run_and_log(cons, [fit_check_sign, '-f', fit, '-k', tmpdir,
-                                '-k', dtb])
+        util.run_and_log(cons, [fit_check_sign, '-f', fit, '-k', dtb])
 
-        # Replace header bytes
+        # Make sure that U-Boot checks that the config is in the list of hashed
+        # nodes. If it isn't, a security bypass is possible.
+        with open(fit, 'rb') as fp:
+            root, strblock = vboot_forge.read_fdt(fp)
+        root, strblock = vboot_forge.manipulate(root, strblock)
+        with open(fit, 'w+b') as fp:
+            vboot_forge.write_fdt(root, strblock, fp)
+        util.run_and_log_expect_exception(cons,
+                [fit_check_sign, '-f', fit, '-k', dtb],
+                1, 'Failed to verify required signature')
+
+        run_bootm(sha_algo, 'forged config', 'Bad Data Hash', False)
+
+        # Create a new properly signed fit and replace header bytes
+        make_fit('sign-configs-%s%s.its' % (sha_algo, padding))
+        sign_fit(sha_algo)
         bcfg = u_boot_console.config.buildconfig
         max_size = int(bcfg.get('config_fit_signature_max_size', 0x10000000), 0)
         existing_size = replace_fit_totalsize(max_size + 1)
@@ -219,7 +234,7 @@ def test_vboot(u_boot_console):
 
     # Create a number kernel image with zeroes
     with open('%stest-kernel.bin' % tmpdir, 'w') as fd:
-        fd.write(5000 * chr(0))
+        fd.write(500 * chr(0))
 
     try:
         # We need to use our own device tree file. Remember to restore it
