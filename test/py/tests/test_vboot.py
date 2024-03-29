@@ -132,8 +132,7 @@ def test_vboot(u_boot_console):
 
         cons.log.action('%s: Check signed config on the host' % algo)
 
-        util.run_and_log(cons, [fit_check_sign, '-f', fit, '-k', tmpdir,
-                                '-k', dtb])
+        util.run_and_log(cons, [fit_check_sign, '-f', fit, '-k', dtb])
 
         # Increment the first byte of the signature, which should cause failure
         sig = util.cmd(cons, 'fdtget -t bx %s %s value' % (fit, sig_node))
@@ -173,7 +172,7 @@ def test_vboot(u_boot_console):
 
     # Create a number kernel image with zeroes
     with open('%stest-kernel.bin' % tmpdir, 'w') as fd:
-        fd.write(5000 * chr(0))
+        fd.write(500 * chr(0))
 
     try:
         # We need to use our own device tree file. Remember to restore it
