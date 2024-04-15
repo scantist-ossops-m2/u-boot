@@ -132,8 +132,7 @@ def test_vboot(u_boot_console):
 
         cons.log.action('%s: Check signed config on the host' % algo)
 
-        util.run_and_log(cons, [fit_check_sign, '-f', fit, '-k', tmpdir,
-                                '-k', dtb])
+        util.run_and_log(cons, [fit_check_sign, '-f', fit, '-k', dtb])
 
         # Increment the first byte of the signature, which should cause failure
         sig = util.cmd(cons, 'fdtget -t bx %s %s value' % (fit, sig_node))
