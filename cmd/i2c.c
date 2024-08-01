@@ -245,10 +245,10 @@ int i2c_set_bus_speed(unsigned int speed)
  *
  * Returns the address length.
  */
-static uint get_alen(char *arg, int default_len)
+static uint get_alen(char *arg, uint default_len)
 {
-	int	j;
-	int	alen;
+	uint	j;
+	uint	alen;
 
 	alen = default_len;
 	for (j = 0; j < 8; j++) {
@@ -291,7 +291,7 @@ static int do_i2c_read ( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv
 {
 	uint	chip;
 	uint	devaddr, length;
-	int alen;
+	uint	alen;
 	u_char  *memaddr;
 	int ret;
 #ifdef CONFIG_DM_I2C
@@ -344,7 +344,7 @@ static int do_i2c_write(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[
 {
 	uint	chip;
 	uint	devaddr, length;
-	int alen;
+	uint	alen;
 	u_char  *memaddr;
 	int ret;
 #ifdef CONFIG_DM_I2C
@@ -510,8 +510,8 @@ static int do_i2c_md ( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[]
 {
 	uint	chip;
 	uint	addr, length;
-	int alen;
-	int	j, nbytes, linebytes;
+	uint	alen;
+	uint	j, nbytes, linebytes;
 	int ret;
 #ifdef CONFIG_DM_I2C
 	struct udevice *dev;
@@ -629,9 +629,9 @@ static int do_i2c_mw ( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[]
 {
 	uint	chip;
 	ulong	addr;
-	int	alen;
+	uint	alen;
 	uchar	byte;
-	int	count;
+	uint	count;
 	int ret;
 #ifdef CONFIG_DM_I2C
 	struct udevice *dev;
@@ -715,8 +715,8 @@ static int do_i2c_crc (cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[]
 {
 	uint	chip;
 	ulong	addr;
-	int	alen;
-	int	count;
+	uint	alen;
+	uint	count;
 	uchar	byte;
 	ulong	crc;
 	ulong	err;
@@ -1022,7 +1022,7 @@ static int do_i2c_probe (cmd_tbl_t *cmdtp, int flag, int argc, char * const argv
 static int do_i2c_loop(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
 	uint	chip;
-	int alen;
+	uint	alen;
 	uint	addr;
 	uint	length;
 	u_char	bytes[16];
